@@ -1,0 +1,106 @@
+PyTorch Image Models (timm)是一个图像模型（models）、层（layers）、实用程序（utilities）、优化器（optimizers）、调度器（schedulers）、数据加载/增强（data-loaders / augmentations）和参考训练/验证脚本（reference training / validation scripts）的集合
+
+
+### timm.utils
+
+```python
+def accuracy(output, target, topk(1,)): # topk可为(1,5) top5
+    """Computes the accuracy over the k top predictions for the specified values of k"""
+    return [acc1,]
+
+class AverageMeter:
+    """Computes and stores the average and current value"""
+    """val,avg,sum,count四个值"""
+    def reset()
+    def update(val, n=1)
+
+```
+
+### timm.models.layers
+
+一些层的模板，可直接插入pytorch moudle中使用
+
+```python
+from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+
+# DropPath  概率执行该条路径,将多分支结构随机删除
+class DropPath(nn.moudle)
+def __init__(drop_prob)  # drop的概率
+x = x + self.drop_path(self.mlp(self.norm2(x)))
+    
+# to_2tuple 转化为二变量元组 根据函数_ntuple(n)可得to_ntuple()
+size = to_2tuple(size)
+
+# trunc_normal_ 截断式正态分布
+```
+
+
+
+### timm.loss
+
+```python
+from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
+
+```
+
+
+
+### timm.scheduler
+
+```python
+from timm.scheduler.scheduler import Scheduler
+# torch.optim.lr_scheduler中也有不少
+scheduler.step_update() # 更新lr
+
+class LinearLRScheduler(Scheduler):
+    def __init__(self,
+                 optimizer: torch.optim.Optimizer,
+                 t_initial: int,
+                 lr_min_rate: float,
+                 warmup_t=0,
+                 warmup_lr_init=0.,
+                 t_in_epochs=True,
+                 noise_range_t=None,
+                 noise_pct=0.67,
+                 noise_std=1.0,
+                 noise_seed=42,
+                 initialize=True,
+                 ) -> None:
+        super().__init__(
+            optimizer, param_group_field="lr",
+            noise_range_t=noise_range_t, noise_pct=noise_pct, noise_std=noise_std, noise_seed=noise_seed,
+            initialize=initialize)
+
+        self.t_initial = t_initial
+        self.lr_min_rate = lr_min_rate
+        self.warmup_t = warmup_t
+        self.warmup_lr_init = warmup_lr_init
+        self.t_in_epochs = t_in_epochs
+        if self.warmup_t:
+            self.warmup_steps = [(v - warmup_lr_init) / self.warmup_t for v in self.base_values]
+            super().update_groups(self.warmup_lr_init)
+        else:
+            self.warmup_steps = [1 for _ in self.base_values]
+
+    def _get_lr(self, t):
+        if t < self.warmup_t:
+            lrs = [self.warmup_lr_init + t * s for s in self.warmup_steps]
+        else:
+            t = t - self.warmup_t
+            total_t = self.t_initial - self.warmup_t
+            lrs = [v - ((v - v * self.lr_min_rate) * (t / total_t)) for v in self.base_values]
+        return lrs
+
+    def get_epoch_values(self, epoch: int):
+        if self.t_in_epochs:
+            return self._get_lr(epoch)
+        else:
+            return None
+
+    def get_update_values(self, num_updates: int):
+        if not self.t_in_epochs:
+            return self._get_lr(num_updates)
+        else:
+            return None
+```
+
