@@ -14,11 +14,36 @@ else:
 
 
 
+## distributedDataParallel
+
+相较于Dataparallel，distributed具有很大优势[解析](https://blog.csdn.net/weixin_41041772/article/details/109820870)
 
 
-## Dataparallel & distributed
+
+```python
+torch.distributed.is_available() # 判断分布式包是否可得
+
+# 分布式进程组初始化 backend=['mpi','gloo','nccl']
+torch.distributed.init_process_group(backend, init_method=None, timeout=datetime.timedelta(0, 1800), world_size=-1, rank=-1, store=None, group_name='')
+
+torch.distributed.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
 
 
+# 不同进程间的数据同步，通过阻塞栅栏
+torch.distributed.barrier()
+```
+
+
+
+## 固定随机值
+
+参数默认是进行随机初始化，使训练时初始化时固定，能够复现结果
+
+```python
+torch.manual_seed(args.seed) #为CPU设置种子用于生成随机数，以使得结果是确定的
+
+torch.cuda.manual_seed(args.seed) #为当前GPU设置随机种子；
+```
 
 
 
@@ -170,3 +195,4 @@ for i, data in data_iter:
     loss.backward()
     self.optimizer.step()
 ```
+

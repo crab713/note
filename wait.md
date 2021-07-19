@@ -1,10 +1,8 @@
 mmcv
 
-torch.distributed.barrier():https://blog.csdn.net/weixin_41041772/article/details/109820870
-
 leakyrelu
 
-UPerNet
+FPN+UPerNet:model
 
 
 
