@@ -10,6 +10,10 @@ if self.use_checkpoint:
 	x = checkpoint.checkpoint(blk, x)  # blk为层或函数，x为变量
 else:
 	x = blk(x)
+    
+    
+# 2d反卷积 只恢复尺寸，不恢复数值 https://www.zhihu.com/question/48279880
+class torch.nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride=1, padding=0, output_padding=0, bias=True)
 ```
 
 
@@ -47,11 +51,29 @@ torch.cuda.manual_seed(args.seed) #为当前GPU设置随机种子；
 
 
 
+## 替换layer
+
+```python
+# 使用model.buffers()查看网络基本结构
+<bound method Module.buffers of ResNet(
+ ...
+ (fc): Linear(in_features=512, out_features=1000, bias=True)
+)
+
+# 将fc层进行替换
+fc_in_features = model.fc.in_features # 获取输入大小
+model.fc = torch.nn.Linear(fc_in_feature, 2, bias=True)
+```
+
+
+
 
 
 
 
 # 基础构建部分
+
+
 
 ### 构建数据集dataset
 
@@ -86,6 +108,7 @@ def __getitem__(self, item):
     output = {"text_input": torch.tensor(text_input, dtype=torch.long),"label": torch.tensor(label_input)}
     return output
 ```
+
 
 
 ### 构建模型

@@ -1,9 +1,5 @@
 mmcv
 
-leakyrelu
-
-FPN+UPerNet:model
-
 
 
 [mm系模型使用](https://zhuanlan.zhihu.com/p/163747610)
