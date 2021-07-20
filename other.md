@@ -67,6 +67,10 @@ ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-�
 
 7. **梯度消失**：极小的梯度无法让参数得到有效更新，即使有微小的更新，浅层和深层网络参数的更新速率也相差巨大。
 
+8. **Hook**：处理被拦截的函数调用，消息等的代码，实现可通过传入一个函数的方式，函数即为一个Hook。pytorch中每一层也可通过register_forward_hook来使用。
+
+9. **resume**：用于训练过程中停止然后恢复训练时加载的权重，与checkpoint类似但不相同
+
 
 
 #### MD的几个标识
@@ -83,5 +87,4 @@ ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-�
 2. [FPN](https://zhuanlan.zhihu.com/p/148738276)
 3. [FCN](https://blog.csdn.net/qq_36269513/article/details/80420363)
 4. [UPerNet](https://www.cnblogs.com/alan-blog-TsingHua/p/9736167.html)
-5. 
 
