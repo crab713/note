@@ -146,6 +146,8 @@ TODO
 
 ## Runner
 
+根源为mmcv.runner.base_runner.py->BaseRunner:class
+
 是训练部分的引擎，使用过程分为4步骤：
 
 1. Runner对象初始化
@@ -224,5 +226,35 @@ for i, data_batch in enumerate(self.data_loader):
     self.call_hook('after_train_iter')
 ```
 
+#### 5. 原理解析
 
+1. 模型的组装位于models.segmentors.encoder_decoder.py->init()中，通过传入cfg字典来获得配置值，构建backbone等组件，数据流通为在backbone中保存各层的输出outputs，return回模型中供decoder等使用
+runner继承于base基类，得到iter和epoch两种迭代类型的runner，以iter_runner为例，实际train.py中调用的为该类中的run方法
+
+2. 在run方法内，需要根据当前工作流所处状态，选择是train或val这两种工作流，通过getattr方法获得对应的函数方法iter_runner=train()/val()
+
+   通过运行该方法，传入该iter所需的数据（大小batch_size）开始对模型的一次训练
+
+3. 以train()为例，模型训练的关键代码为`output = self.model.train_step(data_batch, self.optimizer, **kwargs)`
+
+   这里的model为train.py中传入runner的模型，对应于mmseg.models.segmentors中的类，也就要求必须在模型类中必须要有train_step()函数供调用，val_step()同理
+
+4. 对于encoder_decoder类，需要实现forward_train()和forward_test()两个方法，供forward方法调用(base基类中)
+
+   ``` python
+   def forward(...):
+       if return_loss:
+           return self.forward_train(...)
+       else:
+           return self.forward_test(...)
+   ```
+
+5. 回到runner中，更新学习率部分代码在OptimizerHook类中after_train_iter方法，更新所使用的loss值为decode.loss与aux.loss相加的值，相加部分代码在segmentors的base基类_parse_losses中实现
+
+6. 总结：关键源代码位置如下
+
+   * mmseg.apis.train.py
+   * mmseg.models.segmentors.base.py/encoder_decoder.py
+   * mmcv.runner.base_runner.py/iter_base_runner.py
+   * mmcv.runner.hooks.optimizer.py->after_train_iter(self,runner)
 

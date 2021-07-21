@@ -14,7 +14,29 @@ else:
     
 # 2d反卷积 只恢复尺寸，不恢复数值 https://www.zhihu.com/question/48279880
 class torch.nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride=1, padding=0, output_padding=0, bias=True)
+
+
+# 生成等差数列（可用于drop_path_rate的参数）
+import torch.linspace
+a = torch.linspace(0,10,steps=5) # 0-10之间5个数构成的等差数列
+
+# 做填充层，方便后续训练进行更换，分步训练
+nn.Identity()
+
 ```
+
+
+
+## 维度交换
+
+在torch库中，有transpose和permute两种方式
+
+``` python
+x = x.transpose(1, 2) # 仅能两个维度之间交换
+x = x.permute(0,3,1,2) # 多维度进行交换
+```
+
+
 
 
 
@@ -54,6 +76,11 @@ torch.cuda.manual_seed(args.seed) #为当前GPU设置随机种子；
 ## 替换layer
 
 ```python
+self.add_module(name, layer) # 添加层并赋予name，同name的话会覆盖
+getattr(self, name) # 获取这层
+
+
+
 # 使用model.buffers()查看网络基本结构
 <bound method Module.buffers of ResNet(
  ...

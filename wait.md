@@ -1,7 +1,3 @@
-mmseg.models.builder.build()
-
-auxiliary_head
-
 collate_fn(nn.utils.DataLoader中、诡异bug中)
 
 
@@ -23,6 +19,18 @@ collate_fn(nn.utils.DataLoader中、诡异bug中)
 mmseg.datasets.builder.py 145行 -> mmcv->parallel->collate.py batch=1
 
 
+
+临时：
+
+
+
+
+
+in_channels=[96, 192, 384, 768]
+
+channel = 512
+
+pool_scale=1,2,3,6
 
 
 

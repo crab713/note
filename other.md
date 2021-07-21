@@ -81,6 +81,28 @@ ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-�
 
 ```
 
+### inspect
+
+提供了一些有用的函数帮助获取对象的信息[inspect使用文档](https://docs.python.org/zh-cn/3.7/library/inspect.html)
+
+例：inspect.isclass(obj) 如果obj是类返回True
+
+
+
+## SwinTransformer seg
+
+#### 1. patch_embed
+
+使用Conv2d对每个patch卷积，通道数即为embed_dim，stride=patch_size
+
+在输入stage前embed，即输入第一个stage的embed为96，第二个为2*96
+
+#### 2. PatchMerging
+
+将相邻的四个patch合并为一个新的patch，通过Linear将四个dim合并映射为2*dim长度
+
+
+
 ### paper解析
 
 1. [Faster RCNN](https://zhuanlan.zhihu.com/p/31426458)
