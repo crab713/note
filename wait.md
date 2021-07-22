@@ -22,15 +22,15 @@ mmseg.datasets.builder.py 145行 -> mmcv->parallel->collate.py batch=1
 
 临时：
 
+找Uper最终输出
+
+验证
+
+推理部分输出shape
+
+说明文档
 
 
-
-
-in_channels=[96, 192, 384, 768]
-
-channel = 512
-
-pool_scale=1,2,3,6
 
 
 
