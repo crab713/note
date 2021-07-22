@@ -110,3 +110,13 @@ ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-�
 3. [FCN](https://blog.csdn.net/qq_36269513/article/details/80420363)
 4. [UPerNet](https://www.cnblogs.com/alan-blog-TsingHua/p/9736167.html)
 
+### 解析文章
+
+1. [mmseg解析](https://blog.csdn.net/qq_32425195/article/details/110392397)
+
+2. [mm系模型使用](https://zhuanlan.zhihu.com/p/163747610)
+
+3. [mmlab官方解析](https://www.zhihu.com/people/openmmlab/)
+
+4. [pytorch源码解读索引贴](https://zhuanlan.zhihu.com/p/328674159)
+

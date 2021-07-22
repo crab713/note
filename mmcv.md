@@ -226,7 +226,7 @@ for i, data_batch in enumerate(self.data_loader):
     self.call_hook('after_train_iter')
 ```
 
-#### 5. 原理解析
+#### 5. 原理解析（train部分）
 
 1. 模型的组装位于models.segmentors.encoder_decoder.py->init()中，通过传入cfg字典来获得配置值，构建backbone等组件，数据流通为在backbone中保存各层的输出outputs，return回模型中供decoder等使用
 runner继承于base基类，得到iter和epoch两种迭代类型的runner，以iter_runner为例，实际train.py中调用的为该类中的run方法
