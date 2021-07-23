@@ -27,5 +27,14 @@ https://paperswithcode.com/dataset/bg-20k
 https://mmediting.readthedocs.io/en/latest/matting_datasets.html
 https://github.com/open-mmlab/mmediting/blob/master/docs/getting_started.md
 
+### 3.反卷积方法
 
 
+
+ocr
+
+The Chars74K dataset
+
+**mmocr:**https://github.com/open-mmlab/mmocr
+
+任务为Text Recognition
