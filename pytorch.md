@@ -27,16 +27,93 @@ nn.Identity()
 
 
 
-## 维度交换
+## 维度交换与变换
 
-在torch库中，有transpose和permute两种方式
+在torch库中，有transpose和permute两种方式进行维度交换
 
 ``` python
 x = x.transpose(1, 2) # 仅能两个维度之间交换
 x = x.permute(0,3,1,2) # 多维度进行交换
 ```
 
+维度变换主要有**reshape**和**view**方法,他们的区别在于reshape可作用于非连续的张量上，而view只能作用于连续的张量上
 
+``` python
+x = torch.tensor(2,3,3)
+
+x = x.reshape(6,3)
+x = x.view(6,3)
+```
+
+
+
+## 维度合并与切分
+
+主要有**cat**和**split**两个方法，cat为对向量进行合并，split为切分
+
+``` python
+# 按dim维对向量进行拼接
+c = torch.cat((a,b), dim=0) 
+
+# 按dim维对向量进行切分，以及切分的大小split_size
+# torch.split(tensor, split_size_or_sections, dim=0)
+y = torch.split(x,3,dim=0)#按照4这个维度去分，每大块包含3个小块
+for i in y:
+    print(i.size())
+ 
+output:
+torch.Size([3, 8, 6])
+torch.Size([3, 8, 6])
+torch.Size([1, 8, 6])
+```
+
+
+
+
+
+## datach() && Variable()
+
+#### Variable()
+
+Variable是对Tensor的一个封装，操作与Tensor相同，但是每个Variable都有三个属性，Varibale的Tensor本身的.data，对应Tensor的梯度.grad，以及这个Variable是通过什么方式得到的.grad_fn
+
+在模型训练过程中，会建立一张计算图，梯度计算会在这张图内，而在训练完成后新建的Tensor并不在该图内，无法用该Tensor计算loss，因此需要使用Variable()
+
+``` python
+
+from torch.autograd import Variable
+import torch
+
+y_tensor = torch.randn(10,5)
+x = Variable(x_tensor,requires_grad=True) #Varibale 默认时不要求梯度的，如果要求梯度，需要说明
+```
+
+#### datach()
+
+神经网络的训练有时候可能希望保持一部分的网络参数不变，只对其中一部分的参数进行调整；或者值训练部分分支网络，并不让其梯度对主网络的梯度造成影响,该方法用来切断一些分支的反向传播
+
+**torch.tensor.detach()**用法介绍：
+
+（1）返回一个新的从当前图中分离的Variable。
+
+（2）返回的 Variable 不会梯度更新。
+
+（3）被detach 的Variable volatile=True， detach出来的volatile也为True。
+
+（4）返回的Variable和被detach的Variable指向同一个tensor。
+
+
+
+## 上采样
+
+`CLASS torch.nn.Upsample(size=None, scale_factor=None, mode='nearest', align_corners=None)`
+
+**参数：**
+
+1. **size**:指定输出大小
+2. **scale_factor**:指定输出为输入的多少倍，与size只能填一个
+3. **mode**:可使用的上采样算法，有`'nearest'`, `'linear'`, `'bilinear'`, `'bicubic'` and `'trilinear'`.默认使用'nearest'`
+4. **align_corners**：如果为True，输入的角像素将与输出张量对齐，因此将保存下来这些像素的值。仅当使用的算法为`'linear'`, `'bilinear'`or `'trilinear'时可以使用。``默认设置为``False`
 
 
 
