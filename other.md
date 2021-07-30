@@ -97,6 +97,8 @@ ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-�
 
 10. **Image Matting**：在segmention的基础上，对图像抠图，形成三元组trimap，处理获得更细致的前景图像
 
+11. **ground truth**：指人工标记的，真实的标记label
+
 
 
 #### MD的几个标识

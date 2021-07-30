@@ -69,6 +69,47 @@ torch.Size([1, 8, 6])
 
 
 
+## 张量复制
+
+#### 1.clone()
+
+clone()函数返回一个和源张量同shape、dtype和device的张量，与源张量不共享数据内存，但提供梯度的回溯，对a_进行的运算梯度会加在a的梯度上。
+
+``` python
+a = torch.tensor(1.0, requires_grad=True)
+a_ = a.clone()
+```
+
+#### 2.detach()
+
+detach()函数返回一个和源张量同shape、dtype和device的张量，并且与源张量共享数据内存，但不提供梯度的回溯
+
+``` python
+a_ = a.detach()
+```
+
+#### 3. new_tensor()
+
+new_tensor()可以将源张量中的数据复制到目标张量（数据不共享），同时提供了更细致的属性控制
+
+``` python
+f = a.new_tensor(a, device="cpu", dtype=torch.float64, requires_grad=False)
+```
+
+
+
+## 对数值进行替换
+
+#### 1. where
+
+`torch.where(condition, x, y) → Tensor`
+
+此方法是将x中的元素和条件相比，如果符合条件就还等于原来的元素，如果不满足条件的话，那就去y中对应的值,xy均为tensor
+
+``` python
+torch.where(x > 0, x, y)
+```
+
 
 
 ## datach() && Variable()
