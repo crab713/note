@@ -1,78 +1,3 @@
-### ArgumentParser
-
-``` python 
-import argparse
-# 创建一个解析器
-parser = argparse.ArgumentParser()
-
-# 添加参数
-parser.add_argument('--seed', type=int, default=72, help='Random seed.') # 名称前加--为可选参数
-parser.add_argument('model_path', default='hello') # 名称前无--为必选参数
-
-# 解析参数
-args = parser.parse_args()
-args.model_path # 参数使用
-```
-
-
-
-### BN
-
-syncBN:在多张卡上同步BN，避免在单卡上bz=1，BN无法发挥作用的问题
-
-
-
-### warmup
-
-使用较低的learning rate预热，慢慢恢复到正常，该方法有可能能提高模型的准确率
-
-
-
-### 模型训练次数指标
-
-iter--一次迭代，指一个min_batch的一次forward+backward
-
-epoch--指迭代完一次所有数据
-
-
-
-### Conv layer扩边处理
-
-1. 所有的conv层都是：kernel_size=3，pad=1，stride=1
-2. 所有的pooling层都是：kernel_size=2，pad=0，stride=2
-
-对卷积做扩边处理，原图扩大使得卷积过后不改变输入和输出矩阵大小，只有pooling层才使矩阵长宽变为原来的1/2
-
-
-
-### PPM金字塔池化模型
-
-可以在不同的尺度下来保存全局信息，比简单的单一pooling更能保留全局上下文信息。
-
-标准过程：对特征图分别池化到目标size（不同卷积核），进行卷积将channel减少到原来的1/N，再通过上采样得到相同size，concat拼接，使特征图和channel不变。
-
-
-
-### ReLU系列激活函数
-
-leakyReLU：稍微解决神经元“死亡”的问题，近似于ReLU，但在输入小于0的部分，值为负，并且有微小的梯度，α取值一般为0.01
-
-PReLU激活函数：在LeakyReLU的基础上，将α作为需要学习的参数
-
-ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-α，兼顾两者优点
-
-
-
-### Softmax
-
-用来将向量中的值映射为一个概率值，并相加等于1
-
-在映射过程中，较大的值所映射得到的概率值会相对偏大，较小的值会映射在一个较密集的区域，且概率值较小
-
-**注意点**：在训练过程，如果模型中加入softmax方法，容易导致模型过于趋近于较大的那几个值，导致模型训练偏向极端方向，因此在训练过程中加入softmax不一定适用。
-
-
-
 ### 基本概念
 
 1. **降采样&&下采样**：指缩小图像，有最大值采样等等多种方法
@@ -98,6 +23,113 @@ ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-�
 10. **Image Matting**：在segmention的基础上，对图像抠图，形成三元组trimap，处理获得更细致的前景图像
 
 11. **ground truth**：指人工标记的，真实的标记label
+
+
+
+### ArgumentParser
+
+``` python 
+import argparse
+# 创建一个解析器
+parser = argparse.ArgumentParser()
+
+# 添加参数
+parser.add_argument('--seed', type=int, default=72, help='Random seed.') # 名称前加--为可选参数
+parser.add_argument('model_path', default='hello') # 名称前无--为必选参数
+
+# 解析参数
+args = parser.parse_args()
+args.model_path # 参数使用
+```
+
+
+
+### 图像缩放
+
+在模型训练中，通常都需要缩放图片到某一尺寸，这时使用pytorch或者numpy中的resize方法会使图像缩放失真，宜使用**PIL.Image**模块进行处理，或使用**cv2**也可
+
+```pyhton
+im = Image.open(origin_path+image_name)
+im = im.resize((512,512),Image.ANTIALIAS)
+```
+
+
+
+### loss的设计
+
+loss函数是用来对模型进行评估的函数，其值需要能反映出模型预测的表现程度，常见的有均方差MSE和交叉熵CrossEntropy，但MSE函数在分类问题中，使用softmax得到概率后再采用梯度下降法进行学习，会出现概率接近0或1时，梯度近似于0，学习速率非常慢的问题，因此再分类问题中优选loss为凸函数的形式。
+
+CrossEntropy的优点在于它是一个凸函数（log），再模型训练时学习效率比较快，同时更容易找到全局最优值
+
+同时如同交叉熵这种取log的损失函数好在能把一些函数之间的乘法变成函数之间的加法，对于凸函数而言，凸函数加凸函数依然是凸函数，更有利于多类别的训练，防止乘法溢出
+
+
+
+### BN
+
+syncBN:在多张卡上同步BN，避免在单卡上bz=1，BN无法发挥作用的问题
+
+
+
+### warmup
+
+使用较低的learning rate预热，慢慢恢复到正常，该方法有可能能提高模型的准确率
+
+
+
+### 模型训练次数指标
+
+iter--一次迭代，指一个min_batch的一次forward+backward
+
+epoch--指迭代完一次所有数据
+
+
+
+### ReLU系列激活函数
+
+leakyReLU：稍微解决神经元“死亡”的问题，近似于ReLU，但在输入小于0的部分，值为负，并且有微小的梯度，α取值一般为0.01
+
+PReLU激活函数：在LeakyReLU的基础上，将α作为需要学习的参数
+
+ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-α，兼顾两者优点
+
+
+
+### Softmax
+
+用来将向量中的值映射为一个概率值，并相加等于1
+
+在映射过程中，较大的值所映射得到的概率值会相对偏大，较小的值会映射在一个较密集的区域，且概率值较小
+
+**注意点**：在训练过程，如果模型中加入softmax方法，容易导致模型过于趋近于较大的那几个值，导致模型训练偏向极端方向，因此在训练过程中加入softmax不一定适用，故通常用于二分类中。
+
+在该方法与交叉熵同时使用时，容易学习类间的信息，因为采用了类间竞争机制，但却忽略了其他非正确标签的差异，导致学习到的特征比较散。
+
+
+
+### Conv layer扩边处理
+
+1. 所有的conv层都是：kernel_size=3，pad=1，stride=1
+2. 所有的pooling层都是：kernel_size=2，pad=0，stride=2
+
+对卷积做扩边处理，原图扩大使得卷积过后不改变输入和输出矩阵大小，只有pooling层才使矩阵长宽变为原来的1/2
+
+
+
+### PPM金字塔池化模型
+
+可以在不同的尺度下来保存全局信息，比简单的单一pooling更能保留全局上下文信息。
+
+标准过程：对特征图分别池化到目标size（不同卷积核），进行卷积将channel减少到原来的1/N，再通过上采样得到相同size，concat拼接，使特征图和channel不变。
+
+
+
+### 深度估计
+
+从单张2D图像中估计出物体所处的深度，知乎介绍链接：[大致介绍](https://zhuanlan.zhihu.com/p/29864012)
+
+2014大致方法：卷积后上采样，分pretrain和fine两部分，最后得到每个pixel的log值
+
 
 
 
@@ -128,14 +160,12 @@ ELU：输入大于0的部分梯度为1，输入小于0的部分无限趋近于-�
 ### 解析文章
 
 1. [mmseg解析](https://blog.csdn.net/qq_32425195/article/details/110392397)
-
 2. [mm系模型使用](https://zhuanlan.zhihu.com/p/163747610)
-
 3. [mmlab官方解析](https://www.zhihu.com/people/openmmlab/)
-
 4. [pytorch源码解读索引贴](https://zhuanlan.zhihu.com/p/328674159)
+5. [交叉熵解析](https://zhuanlan.zhihu.com/p/35709485)
 
 ### 网站杂
 
 1. [pytorch的坑](https://zhuanlan.zhihu.com/p/59271905)
-2. [mmlab宝贝网站](https://openmmlab.com/)
+2. [mmlab坑人网站](https://openmmlab.com/)

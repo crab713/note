@@ -123,3 +123,8 @@ python demo/image_demo.py demo.png ../upernet_swin_tiny_patch4_window7_512x512_1
 2. **inference outputs**:根据model中simple_test方法return的数据而定，默认返回维度为[h,w,1]的list，最后一维代表该像素点的类别，可返回[h,w,channel]的原始output
 3. **inference inputs**:输入图片地址，由api转换为[N,c=3,h,w]维度
 
+
+
+### 模型val要点
+
+**mIoU**位置：mmseg.core.evaluation.metrics.py
