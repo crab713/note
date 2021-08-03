@@ -20,6 +20,22 @@ vscode的一些常用组件和操作
 
 
 
+## linux
+
+查看文件
+
+du -sh * 查看每个文件夹的大小
+
+df -h 查看磁盘剩余空间
+
+tar -zcvf data.tar.gz data 通过gzip的方式对文件进行打包压缩
+
+rm -rf * 删库跑路
+
+tar -xf data.tar.gz -c /data/ 解压到指定目录
+
+
+
 ### MobaXterm
 
 一个用于SSH连接的软件
