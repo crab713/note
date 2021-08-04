@@ -98,7 +98,7 @@ f = a.new_tensor(a, device="cpu", dtype=torch.float64, requires_grad=False)
 
 
 
-## 对数值进行替换
+## Tensor数值操作
 
 #### 1. where
 
@@ -109,6 +109,12 @@ f = a.new_tensor(a, device="cpu", dtype=torch.float64, requires_grad=False)
 ``` python
 torch.where(x > 0, x, y)
 ```
+
+#### 2. sum
+
+`torch.sum(input, list: dim, bool: keepdim=False, dtype=None) → Tensor`
+
+**dim**:要求和的维度，根据该维度求和，返回的值为一个tensor数组，为none时返回全部数的和
 
 
 
