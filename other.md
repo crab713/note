@@ -48,10 +48,26 @@ args.model_path # 参数使用
 
 在模型训练中，通常都需要缩放图片到某一尺寸，这时使用pytorch或者numpy中的resize方法会使图像缩放失真，宜使用**PIL.Image**模块进行处理，或使用**cv2**也可
 
-```pyhton
+```python
+# Image
 im = Image.open(origin_path+image_name)
 im = im.resize((512,512),Image.ANTIALIAS)
+
+# CV2
+img = cv2.resize(src=img, dsize=(1024, 768), fx=0.0, fy=0.0, interpolation=cv2.INTER_AREA)
 ```
+
+
+
+### 图像导出
+
+使用cv2.imwrite()
+
+``` python
+cv2.imwrite(filename, img)
+```
+
+
 
 
 
@@ -168,8 +184,6 @@ $$n_t = a * g_t $$
 def trivalurize(M):
 	return (M>=50).astype(int)-(M<=150).astype(int)+1
 ```
-
-
 
 
 
