@@ -79,6 +79,10 @@ CrossEntropy的优点在于它是一个凸函数（log），再模型训练时�
 
 同时如同交叉熵这种取log的损失函数好在能把一些函数之间的乘法变成函数之间的加法，对于凸函数而言，凸函数加凸函数依然是凸函数，更有利于多类别的训练，防止乘法溢出
 
+**nn.L1Loss**:取预测值和真实值的绝对误差平均数
+
+**nn.SmoothL1Loss**:误差在(-1, 1)取平方，其他时候是L1
+
 
 
 ### loss出现nan
@@ -174,7 +178,7 @@ $$n_t = a * g_t $$
 
 从单张2D图像中估计出物体所处的深度，知乎介绍链接：[大致介绍](https://zhuanlan.zhihu.com/p/29864012)
 
-2014大致方法：卷积后上采样，分pretrain和fine两部分，最后得到每个pixel的log值
+2014大致方法：卷积后上采样，分pretrain和fine两部分，最后得到每个pixel的深度值
 
 
 
@@ -219,6 +223,9 @@ def trivalurize(M):
 3. [mmlab官方解析](https://www.zhihu.com/people/openmmlab/)
 4. [pytorch源码解读索引贴](https://zhuanlan.zhihu.com/p/328674159)
 5. [交叉熵解析](https://zhuanlan.zhihu.com/p/35709485)
+6. [transform应用](https://blog.csdn.net/qq_35027690/article/details/103742697)
+7. [基础的loss函数](https://zhuanlan.zhihu.com/p/81956896)
+
 
 ### 网站杂
 

@@ -135,7 +135,7 @@ y_tensor = torch.randn(10,5)
 x = Variable(x_tensor,requires_grad=True) #Varibale 默认时不要求梯度的，如果要求梯度，需要说明
 ```
 
-#### datach()
+#### detach()
 
 神经网络的训练有时候可能希望保持一部分的网络参数不变，只对其中一部分的参数进行调整；或者值训练部分分支网络，并不让其梯度对主网络的梯度造成影响,该方法用来切断一些分支的反向传播
 
