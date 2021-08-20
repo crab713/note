@@ -232,4 +232,5 @@ def trivalurize(M):
 1. [pytorch的坑](https://zhuanlan.zhihu.com/p/59271905)
 2. [mmlab坑人网站](https://openmmlab.com/)
 3. [paperwithcode](https://paperswithcode.com/)
+4. [DL基础知识](http://zh.gluon.ai/chapter_computer-vision/ssd.html)
 
