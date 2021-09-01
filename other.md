@@ -225,6 +225,7 @@ def trivalurize(M):
 5. [交叉熵解析](https://zhuanlan.zhihu.com/p/35709485)
 6. [transform应用](https://blog.csdn.net/qq_35027690/article/details/103742697)
 7. [基础的loss函数](https://zhuanlan.zhihu.com/p/81956896)
+8. [HDF5文件读写](https://blog.csdn.net/tracelessle/article/details/108304011)
 
 
 ### 网站杂
