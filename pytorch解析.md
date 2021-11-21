@@ -125,3 +125,52 @@ def dummy_bn_forward(x, bn_weight, bn_bias, eps, mean_val=None, var_val=None):
     return mean_val, var_val, x
 ```
 
+
+
+# Data
+
+由Dataset、Sampler、DataLoader三部分组成，Dataset包装数据；Sampler决定采样方式；DataLoader负责总的调度，方便的在数据集上遍历。
+
+## Dataset
+
+Dataset 共有 Map-style datasets 和 Iterable-style datasets 两种：
+
+### 1.1 Map-style dataset
+
+`torch.utils.data.Dataset`
+
+它是一种通过实现 `__getitem__()` 和 `__len()__` 来获取数据的 Dataset。
+
+### 1.2 Iterable-style dataset
+
+`torch.utils.data.IterableDataset`
+
+它是一种实现 `__iter__()` 来获取数据的 Dataset。
+
+## Sampler
+
+`torch.utils.data.Sampler` 负责提供一种遍历数据集所有元素**索引**的方式。
+
+对于所有的采样器来说，都需要继承Sampler类，必须实现的方法为`__iter__()`，当 DataLoader 需要计算len时需定义`__len__()`
+
+PyTorch 也在此基础上提供了其他类型的 Sampler 子类
+
+- `torch.utils.data.SequentialSampler` : 顺序采样样本，始终按照同一个顺序
+- `torch.utils.data.RandomSampler`: 可指定有无放回地，进行随机采样样本元素
+- `torch.utils.data.SubsetRandomSampler`: 无放回地按照给定的索引列表采样样本元素
+- `torch.utils.data.WeightedRandomSampler`: 按照给定的概率来采样样本。样本元素来自 `[0,…,len(weights)-1]` ， 给定概率（权重）
+- `torch.utils.data.BatchSampler`: 在一个batch中封装一个其他的采样器, 返回一个 batch 大小的 index 索引
+- `torch.utils.data.DistributedSample`: 将数据加载限制为数据集子集的采样器。与 `torch.nn.parallel.DistributedDataParallel` 结合使用。 在这种情况下，每个进程都可以将 `DistributedSampler` 实例作为 `DataLoader` 采样器传递
+
+## DataLoader
+
+### 接口定义
+
+```python
+DataLoader(dataset, batch_size=1, shuffle=False, sampler=None,
+           batch_sampler=None, num_workers=0, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None, *, prefetch_factor=2,
+           persistent_workers=False)
+```
+
