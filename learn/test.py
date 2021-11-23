@@ -1,8 +1,17 @@
-from torch import nn
+from typing import Union
 import torch
-from torch.autograd import Function
+from torch import Tensor
+from torch import nn
+from torch.nn import functional as f
 
-x = torch.ones(8,3,20)
-mean_val = x.mean([0,2])
-x = x - mean_val[None, ..., None]
-print(x.shape)
+class MLP(nn.Module):
+    def __init__(self):
+        super(MLP, self).__init__()
+        self.register_buffer('test', torch.tensor([1,2,3]))
+
+    def forward(self, x):
+        return x
+
+net = MLP()
+name = net.__getattr__('test')
+print(name)
