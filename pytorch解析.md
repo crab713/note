@@ -288,7 +288,7 @@ net.apply(init_weights)
 
 nn.module类中的几种参数类型：parameters、buffer、module：attribute
 
-基类中通过重写`__delattr__` ， `__setattr__`，`__getattr__`从而实现管理
+基类中通过重写`__delattr__` ， `__setattr__`，`__getattr__`，`__dir__`从而实现管理
 
 ### 4.5.1 属性修改
 
@@ -327,4 +327,96 @@ nn.Module中提供了常用函数，都会返回一个迭代器用于访问模�
 7. modules：调用 self.named_modules 并返回各个 module 但不返回 name
 8. named_modules：返回 self._modules 下的 name 和 module 元组，并递归调用和返回 module.named_modules
 9. **module.attribute**：等价于`getattr(module, 'attribute')`
+
+## 4.6 Hook
+
+在nn.Module中一共包含3种通用的hook，又分为**全局hook和局部hook**，分别为**backward_hook**，**forward_pre_hook**，**forward_hook**。
+
+### 4.6.1 注册函数
+
+每个注册函数修改的OrderDict如下所示：
+
+1. register_module_backward_hook：_global_backward_hooks
+2. register_module_forward_pre_hook：_global_forward_pre_hooks
+3. register_module_forward_hook：_global_forward_hooks
+4. self.register_backward_hook: self._backward_hooks，此函数**已弃用**，取而代之的为**self.register_full_backward_hook**
+5. self.register_forward_pre_hook: self._forward_pre_hooks
+6. self.register_forward_hook: self._forward_hooks
+
+### 4.6.2 运行逻辑
+
+`self.__call__`->`self._call_impl`->`_global_forward_pre_hooks`->`self._forward_pre_hooks`->`self.forward / slow_forward`->`_global_forward_hooks`->`self._forward_hooks`->**register** backward_hooks
+
+### 4.6.3 其他Hook
+
+关于模型参数的加载和存储
+
+1. _register_state_dict_hook：在self.state_dict()的最后对模块导出的 state_dict 进行修改
+2. _register_load_state_dict_pre_hook：在 _load_from_state_dict 中最先执行
+
+## 4.7 参数加载和存储
+
+### 4.7.1 存储
+
+1. `net.state_dict()`：获取模型中的所有parameter，buffer参数
+
+2. `net`：保存整个模型
+
+使用 state_dict() 函数在模型训练中储存 checkpoint，checkpoint中会存在metadata用来记录版本信息。 模块的 version 信息会首先存入 **metadata** 中，然后会通过 save_to_state_dict() 将 self.parameters 以及 self._buffers 中的 persistent buffer 进行保存。 **用户可以通过重载 _save_to_state_dict 函数来满足特定的需求**。
+
+### 4.7.2 加载
+
+通过load_state_dict() 函数来读取 checkpoint；实现原理为通过调用每个子模块的_load_from_state_dict 函数来加载他们所需的权重，说明了**每个模块可以自行定义他们的 _load_from_state_dict 函数来满足特殊需求**。
+
+### 4.7.3 重写用途示例
+
+- Example: 避免 BC-breaking，例如迭代过程中方法更新和重命名。
+
+  解决: 通过 `_version` 和 `_load_from_state_dict` 来处理的这类问题。
+
+  ``` python
+  def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict,
+                            missing_keys, unexpected_keys, error_msgs):
+      version = local_metadata.get('version', None)
+      if (version is None or version < 2) and self.track_running_stats:
+          # at version 2: added num_batches_tracked buffer
+          #               this should have a default value of 0
+          num_batches_tracked_key = prefix + 'num_batches_tracked'
+          if num_batches_tracked_key not in state_dict:
+              state_dict[num_batches_tracked_key] = torch.tensor(0, dtype=torch.long)
+      super(_NormBase, self)._load_from_state_dict(
+          state_dict, prefix, local_metadata, strict,
+          missing_keys, unexpected_keys, error_msgs)
+  ```
+
+- Example: 模型迁移，指加载预训练模型等情况权重名字对不上，可以使用_load_from_state_dict 来进行命名的转换，以加载不同的模型。
+
+  ```python
+  def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict,
+                            missing_keys, unexpected_keys, error_msgs):
+      # override the _load_from_state_dict function
+      # convert the backbone weights pre-trained in Mask R-CNN
+      # use list(state_dict.keys()) to avoid
+      # RuntimeError: OrderedDict mutated during iteration
+      for key_name in list(state_dict.keys()):
+          key_changed = True
+          if key_name.startswith('backbone.'):
+              new_key_name = f'img_backbone{key_name[8:]}'
+          elif key_name.startswith('neck.'):
+              new_key_name = f'img_neck{key_name[4:]}'
+          elif key_name.startswith('rpn_head.'):
+              new_key_name = f'img_rpn_head{key_name[8:]}'
+          elif key_name.startswith('roi_head.'):
+              new_key_name = f'img_roi_head{key_name[8:]}'
+          else:
+              key_changed = False
+          if key_changed:
+              logger = get_root_logger()
+              print_log(
+                  f'{key_name} renamed to be {new_key_name}', logger=logger)
+              state_dict[new_key_name] = state_dict.pop(key_name)
+      super()._load_from_state_dict(state_dict, prefix, local_metadata,
+                                    strict, missing_keys, unexpected_keys,
+                                    error_msgs)
+  ```
 
