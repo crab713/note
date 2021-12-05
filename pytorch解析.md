@@ -420,3 +420,59 @@ nn.Module中提供了常用函数，都会返回一个迭代器用于访问模�
                                     error_msgs)
   ```
 
+
+
+# 5 DP & DDP
+
+数据并行和分布式训练解析，涉及`nn.DataParallel(DP)`，`nn.parallel.DistributedDataParallel(DDP)`。
+
+## 5.1 DP
+
+使用：`model = nn.DataParallel(model)`
+
+### 5.1.1 原理
+
+DP基于单机多卡，所有设备都负责计算和训练网络，且device[0]还负责整合梯度，更新参数。
+
+大体由三个过程组成：
+
+- 过程一：各卡分别计算损失和梯度
+- 过程二：所有梯度整合到 device[0]
+- 过程三：device[0] 进行参数更新，其他卡拉取 device[0] 的参数进行更新
+
+### 5.1.2 实现
+
+**基类**：nn.Module，同样返回的是一个模型，在forward中实现对输入数据的切分等操作。
+
+**关键函数**：scatter，replicate，parallel_apply，gather
+
+- scatter：负责将输入tensor分成相等的块给不同的GPU，对于其他的数据类型则复制。
+- replicate：复制拷贝Module中的参数（parameters，buffers，modules），根据输入的device_ids长度确定复制几份。
+- parallel_apply：起多线程计算，在DDP中同样使用该函数
+- gather：将结果收集到device[0]中
+
+**运行流程**：前向传播时，用scatter函数将数据从device[0]分配复制到不同的卡，用Replicate函数将模型从device[0]复制到不同的卡，之后parallel_apply起多线程调用forward计算，用gather收集梯度在device[0]中更新。
+
+## 5.2 DDP
+
+### 5.2.1 使用
+
+```python
+import torch
+from torch.nn.parallel import DistributedDataParallel as DDP
+torch.distributed.init_process_group(backend='nccl',
+                                    world_size=1,
+                                    init_method='env://')
+torch.cuda.set_device(args.local_rank)
+
+model = DDP(model,
+            device_ids=[args.local_rank],
+            output_device=args.local_rank).to(device)
+```
+
+### 5.2.2 区别
+
+- **进程**：DDP中采用多进程，每张卡一个进程，避免线程颠簸造成资源浪费
+- **通信成本**：DDP中支持Ring AllReduce，通信成本是恒定的，与GPU无关。
+- **状态同步**：DDP中通过保证初始状态相同且改变量相同(同步梯度)，保证模型同步
+

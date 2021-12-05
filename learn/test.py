@@ -2,7 +2,13 @@ from typing import Union
 import torch
 from torch import Tensor
 from torch import nn
+from torch.nn.parallel import DistributedDataParallel
 from torch.nn import functional as f
+
+import os
+
+os.environ['MASTER_ADDR'] = 'localhost'
+os.environ['MASTER_PORT'] = '5678'
 
 class MLP(nn.Module):
     def __init__(self):
@@ -13,14 +19,10 @@ class MLP(nn.Module):
     def forward(self, x):
         return x
 
+torch.cuda.set_device(-1)
+torch.distributed.init_process_group(backend='nccl',
+                                    world_size=1,
+                                    init_method='env://',
+                                    rank=0)
 
 net = MLP()
-
-# torch.save(net.state_dict(), 'demo2.pth')
-checkpoint = torch.load('demo2.pth')
-net.load_state_dict()
-state_dict = net.state_dict()
-for data in state_dict._metadata.values():
-    print(data)
-    print(type(data))
-# print(state_dict.__dict__)
